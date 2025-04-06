@@ -1,46 +1,80 @@
-### Introduction
-Private banks face a crucial challenge in ensuring that client onboarding processes are efficient, secure, and compliant with regulatory requirements. Manual verification of client data can be time-consuming and prone to errors, leading to delayed or incorrect onboarding decisions.
+# 🏦 Client Onboarding for Private Banking  
+*Julius Bär Challenge - ETHZ ACE Datathon 2025*  
+**Team:** Andreas Spanopoulos, Hector Maeso, Marcell Schnieder, Juan Garcia
 
-### Challenge Objective
-In this 24-hour datathon challenge, participants will develop an automated solution to verify the consistency of client data and predict whether a client should be accepted or rejected based on their profile information.
+![System Overview](images/empty-diagram.png)
 
-### Dataset Description
-Participants will be provided with a training dataset consisting of 10,000 client profiles, each comprising five JSON documents:
+## 🚀 TL;DR
+We built a **modular and explainable onboarding system** that filters private banking clients using a combination of **handcrafted rules**, **language models**, and a **classifier based on LLM embeddings**. The system is efficient, reliable, and offers transparent rejection reasons for clients.
 
-* passport.json: Client identification details
-* client_profile.json: Demographic and personal information
-* account_form.json: Account opening details
-* client_description.json: KYC description of a client
-* label.json: Binary label indicating whether the client data is consistent and acceptable (Accept) or not (Reject)
+---
 
-### Task
-Using the provided training dataset, participants must develop a machine learning model or algorithm that can automatically verify the consistency of client data and predict the corresponding label.
+## 🧠 System Architecture
 
-### Evaluation Dataset
-After the development period, participants will receive a separate evaluation dataset consisting of 1,000 client profiles, each with four JSON documents (passport, client_profile, account_form, and client_description). Their task is to apply their solution to these new client profiles and generate a CSV file with two columns (no header, no index):
+Our onboarding pipeline is composed of the following steps:
 
-* client_id: Unique identifier for each client
-* label: Predicted binary label (Accept or Reject) indicating whether the client data is consistent and acceptable
+1. **Data ingestion:** Client `.json` data is loaded into a structured container and passed into the onboarding model.
+2. **Basic validation:** Simple constraints are checked using an **explainable rules knowledge base**. If a rule fails, the client is rejected with a log of the violated rule.
+3. **Semantic validation:** For complex fields, natural language inputs are parsed via the **OpenAI API**, then validated with the same rules.
+4. **Final check:** If all handcrafted checks pass, we extract **LLM-based embeddings** (via **RoBERTa**) and use a small **MLP classifier** to make the final accept/reject decision.
 
-### Deliverables
-A single CSV file containing the predicted labels for the 1,000 client profiles in the evaluation dataset   
-Codebase with solution   
-Presentation describing the approach, methodology, and any insights gained during the challenge (5 minutes)
+---
 
-### Description of Repository
-Following files are available in repository:
+## 🔍 Explainability & Risk
 
-* datathon.zip - archive with 10,000 clients. Each client is a separate archive, consisting of five files mentioned
-  * this archive is split into four parts, named datathon_part[i].zip
-* solution.csv - template CSV file to show the shape of expected solution delivered for evaluation set
-* evaluation.zip - archive with 1,000 clients. Each client is a separate archive, consisting of four files mentioned
-  * this file will be submitted shortly before end of the challenge
+- Most client rejections are **fully explainable** and based on deterministic rules.
+- **Human oversight** is suggested only for edge cases involving semantic interpretation.
+- **Handcrafted rule failures** are annotated and logged clearly, making the model transparent and auditable.
+- **False rejection rate:** **<1%**, helping reduce reputational risks.
+- Next focus: Improving filtering of **undesired acceptances** to ensure regulatory compliance.
 
-### Evaluation of Solution
-Solution provided will be evaluated according to following criteria:
-* accuracy in provided solution file
-* solution design criteria like efficiency, novelty, elegance and applicability within the banking sector
-* presentation of the solution
+---
 
-### Hand-in
-To evaluate prediction score, classification labels have to be provided in the same format as in the provided example. Name your submission csv file as "<team_name>.csv". Please fork this repository, start developing your project, and ensure your final submission, including your code, is uploaded to your forked repository **before Sunday 12:00pm**, as this will be used to evaluate your solution.
+## ⚙️ Resource Efficiency
+
+- 🕒 **~1 second** per classification on a GPU laptop  
+- 🌍 **< $0.01 CHF** API cost per client  
+- 🔧 Rules are executed in order of **increasing resource cost**  
+- 🧩 **Modular design** allows for plug-and-play rule updates or model swaps
+
+> 🧾 Total development cost: **< $10 CHF** (OpenAI API usage)
+
+---
+
+## 📊 Results
+
+- **Validation accuracy:** ~95%  
+- Most incorrect predictions are **false acceptances**, not false rejections
+- Accuracy can be further improved with:
+  - Domain expert feedback
+  - Human-in-the-loop between modules
+  - More advanced LLMs or rule refinement
+
+---
+
+## ✅ Conclusions
+
+Our onboarding system combines:
+- ✅ **Transparency** in rejections  
+- 🤖 **Powerful language model support**  
+- 🧱 **Robust, modular rule-based structure**
+
+It is capable of handling complex, nuanced cases while ensuring most decisions are **auditable, interpretable, and compliant**.
+
+> 📉 False rejection rate: **<1%**  
+> ⚠️ Focus area for improvement: **false acceptances** and compliance mitigation
+
+---
+
+## 📁 Project Structure
+
+```bash
+.
+├── data/                 # Client data (input)
+├── images/               # Project visuals
+│   └── empty-diagram.png
+├── rules/                # Handcrafted explainable rules
+├── models/               # Embedding + classification modules
+├── api/                  # OpenAI-based language field validation
+└── main.py               # Pipeline entrypoint
+
