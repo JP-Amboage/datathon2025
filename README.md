@@ -65,16 +65,3 @@ It is capable of handling complex, nuanced cases while ensuring most decisions a
 > ⚠️ Focus area for improvement: **false acceptances** and compliance mitigation
 
 ---
-
-## 📁 Project Structure
-
-```bash
-.
-├── data/                 # Client data (input)
-├── images/               # Project visuals
-│   └── empty-diagram.png
-├── rules/                # Handcrafted explainable rules
-├── models/               # Embedding + classification modules
-├── api/                  # OpenAI-based language field validation
-└── main.py               # Pipeline entrypoint
-
